@@ -1,5 +1,28 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  app: {
+    head: {
+      meta: [
+        {
+          name: "description",
+          content: "Trello PowerUp Library by proclaim productions",
+        },
+      ],
+      link: [
+        {
+          rel: "stylesheet",
+          href: "https://trello.com/power-ups/power-up.css",
+        },
+      ],
+      script: [
+        {
+          src: "https://p.trellocdn.com/power-up.min.js",
+          crossorigin: "anonymous",
+          tagPosition: "head",
+        },
+      ],
+    },
+  },
   routeRules: {
     "/*": { cors: true },
   },
