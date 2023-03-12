@@ -1,0 +1,13 @@
+version: "3.7"
+
+services:
+  caddy:
+    image: caddy:2.6.4-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+    extra_hosts:
+      wsl: "${WSL_IP_ADDRESS}"

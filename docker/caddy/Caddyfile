@@ -1,0 +1,10 @@
+localhost {
+
+    handle /_nuxt/socket.io {
+        reverse_proxy http://wsl:5551
+    }
+
+    handle {
+        reverse_proxy http://wsl:5555
+    }
+}
