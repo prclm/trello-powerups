@@ -5,9 +5,25 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint:js": "eslint --ext \".ts,.js,.vue\" --ignore-path .gitignore .",
+    "lint:format": "prettier --check .",
+    "lint": "npm run lint:js && npm run lint:format",
+    "lintfix": "prettier --write --list-different . && npm run lint:js --fix",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*": "npm run lintfix"
   },
   "devDependencies": {
-    "nuxt": "^3.2.3"
+    "@nuxtjs/eslint-config-typescript": "^12.0.0",
+    "@typescript-eslint/parser": "^5.54.1",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.7.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.0",
+    "nuxt": "^3.2.3",
+    "prettier": "^2.8.4"
   }
 }

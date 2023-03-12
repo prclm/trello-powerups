@@ -1,5 +1,3 @@
 <template>
-    <div>
-        Trello PowerUps Library
-    </div>
+  <div>Trello PowerUps Library</div>
 </template>
