@@ -1,7 +1,7 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div>
-    TimeTracker PowerUp wird initialisiert...<br />
-    Hier gibt es nichts zu sehen.
+    TimeTracker PowerUp wird initialisiert...
     <ul>
       <li>
         <NuxtLink to="./card-back-section/">Card Back Section</NuxtLink>
