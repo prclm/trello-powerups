@@ -1,3 +1,4 @@
+import { ref as vueRef } from "vue";
 import { Trello } from "~~/types/trello";
 
 export const T_IFRAME_INIT_HEIGHT = 1;
@@ -26,8 +27,9 @@ export const useTrello = (powerUpName: string) => {
   const getContext = () => getTrelloContext() || LOCAL_CONTEXT;
   const isTrelloIframe = () => !!getTrelloContext();
 
-  const handleIframeResize = (ref: globalThis.Ref<HTMLElement | undefined>) => {
-    if (!isTrelloIframe()) return;
+  const handleIframeResizeRef = () => {
+    const ref = vueRef<HTMLElement | undefined>();
+    if (!isTrelloIframe()) return ref;
 
     const resizeIframe = () => {
       if (ref.value) {
@@ -51,6 +53,7 @@ export const useTrello = (powerUpName: string) => {
       if (!resizeIframeObserver) return;
       resizeIframeObserver.disconnect();
     });
+    return ref;
   };
 
   const get = async (
@@ -198,7 +201,7 @@ export const useTrello = (powerUpName: string) => {
     T,
     isTrelloIframe,
     getContext,
-    handleIframeResize,
+    handleIframeResizeRef,
     get,
     getAll,
     set,

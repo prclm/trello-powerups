@@ -8,7 +8,6 @@ import { TPU_TIMETRACKER } from "./index.vue";
 
 <script setup lang="ts">
 const trelloInstance = useTrello(TPU_TIMETRACKER);
-const wrapper = ref<HTMLElement>();
-const { handleIframeResize } = trelloInstance;
-handleIframeResize(wrapper);
+const { handleIframeResizeRef } = trelloInstance;
+const wrapper = handleIframeResizeRef();
 </script>
