@@ -1,8 +1,12 @@
-import { ref as vueRef } from "vue";
+import { onMounted, onUnmounted, ref } from "#imports";
 import { Trello } from "~~/types/trello";
 
 export const T_IFRAME_INIT_HEIGHT = 1;
+export const TRELLO_CTX_SYMBOL = Symbol(
+  "trello iframe context provider identifier"
+);
 
+/** get the TrelloPowerUp Object from window if in browser enviroment */
 export const isClient = process.client && window !== undefined;
 export const PowerUp = (isClient && window.TrelloPowerUp) || null;
 
@@ -22,19 +26,30 @@ const LOCAL_CONTEXT = {
 } as Trello.PowerUp.Context;
 
 export const useTrello = (powerUpName: string) => {
+  /** T as the trello api Object */
   const T = PowerUp?.iframe();
+
+  /**
+   * provide the trello context OR LOCAL_CONTEXT for testing
+   * https://developer.atlassian.com/cloud/trello/power-ups/client-library/t-getcontext/#t-getcontext--
+   */
   const getTrelloContext = () => T?.getContext();
   const getContext = () => getTrelloContext() || LOCAL_CONTEXT;
+
+  /** helper function that proofs the trello context */
   const isTrelloIframe = () => !!getTrelloContext();
 
+  /**
+   * handleIframeResizeRef provides a ref for the iframe container
+   * and observes the refElement size to call trello to resize the iframe
+   */
+
   const handleIframeResizeRef = () => {
-    const ref = vueRef<HTMLElement | undefined>();
-    if (!isTrelloIframe()) return ref;
+    const refEl = ref<HTMLElement | undefined>();
+    if (!isTrelloIframe()) return refEl;
 
     const resizeIframe = () => {
-      if (ref.value) {
-        T?.sizeTo(ref.value);
-      }
+      refEl.value && T?.sizeTo(refEl.value);
     };
 
     const resizeIframeObserver = isClient
@@ -42,32 +57,39 @@ export const useTrello = (powerUpName: string) => {
       : null;
 
     onMounted(() => {
-      if (ref.value) {
+      if (refEl.value) {
         resizeIframe();
-        if (!resizeIframeObserver) return;
-        resizeIframeObserver.observe(ref.value);
+        resizeIframeObserver?.observe(refEl.value);
       }
     });
 
     onUnmounted(() => {
-      if (!resizeIframeObserver) return;
-      resizeIframeObserver.disconnect();
+      resizeIframeObserver?.disconnect();
     });
-    return ref;
+    return refEl;
   };
 
-  const storedDataRef = vueRef();
+  /**
+   * DataHandling Adapters
+   *
+   * - uses LocalStorage as fallback outside of trello iframes
+   * - trello data api: https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#getting-and-setting-data
+   *
+   * - get()
+   * - getLocalStorage() (private)
+   * - getAll()
+   * - getAllLocalStorage() (private)
+   * - getAllFiltered()
+   * - set()
+   * - setLocalStorage() (private)
+   * - remove()
+   * - removeLocalStorage() (private)
+   * - stringifyLocalStorageKey() (private)
+   * - parseLocalStorageKey() (private)
+   */
 
-  const updateStoredData = async () => {
-    storedDataRef.value = await getAll();
-  };
-
-  const initStoredDataRef = () => {
-    onMounted(() => {
-      updateStoredData();
-    });
-    return storedDataRef;
-  };
+  const localStorageKeyPrefix = `tpu-${powerUpName}`;
+  const localStorageKeySeparator = "-+-";
 
   const get = async (
     scope: Trello.PowerUp.Scope,
@@ -81,11 +103,48 @@ export const useTrello = (powerUpName: string) => {
     return getLocalStorage(scope, visibility, key, defaultValue);
   };
 
+  const getLocalStorage = (
+    scope: Trello.PowerUp.Scope,
+    visibility: Trello.PowerUp.Visibility,
+    key: string,
+    defaultValue: unknown
+  ) => {
+    if (isClient) {
+      const storedValue = window.localStorage.getItem(
+        stringifyLocalStorageKey(scope, visibility, key)
+      );
+      if (storedValue !== null) return JSON.parse(storedValue);
+      return defaultValue;
+    }
+  };
+
   const getAll = async () => {
     if (isTrelloIframe()) {
       return { ...(await T?.getAll()) };
     }
     return { ...getAllLocalStorage() };
+  };
+
+  const getAllLocalStorage = () => {
+    if (isClient) {
+      const allKeys = Object.keys({ ...window.localStorage }).filter((key) =>
+        key.startsWith(localStorageKeyPrefix)
+      );
+      const allValues = allKeys.map((key) => ({
+        key,
+        value: localStorage.getItem(key),
+      }));
+      const pluginData = allValues.reduce((dataObj: any, item) => {
+        const { scope, visibility, key } = parseLocalStorageKey(item.key);
+        if (!item.value) return dataObj;
+        if (dataObj[scope] === undefined) dataObj[scope] = {};
+        if (dataObj[scope][visibility] === undefined)
+          dataObj[scope][visibility] = {};
+        dataObj[scope][visibility][key] = JSON.parse(item.value);
+        return dataObj;
+      }, {});
+      return pluginData;
+    }
   };
 
   const getAllFiltered = async ({
@@ -135,6 +194,20 @@ export const useTrello = (powerUpName: string) => {
     updateStoredData();
   };
 
+  const setLocalStorage = (
+    scope: Trello.PowerUp.Scope,
+    visibility: Trello.PowerUp.Visibility,
+    key: string,
+    value: unknown
+  ) => {
+    if (isClient) {
+      window.localStorage.setItem(
+        stringifyLocalStorageKey(scope, visibility, key),
+        JSON.stringify(value)
+      );
+    }
+  };
+
   const remove = async (
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
@@ -146,8 +219,17 @@ export const useTrello = (powerUpName: string) => {
     return removeLocalStorage(scope, visibility, key);
   };
 
-  const localStorageKeyPrefix = `tpu-${powerUpName}`;
-  const localStorageKeySeparator = "-+-";
+  const removeLocalStorage = (
+    scope: Trello.PowerUp.Scope,
+    visibility: Trello.PowerUp.Visibility,
+    key: string
+  ) => {
+    if (isClient) {
+      window.localStorage.removeItem(
+        stringifyLocalStorageKey(scope, visibility, key)
+      );
+    }
+  };
 
   const stringifyLocalStorageKey = (
     scope: string,
@@ -167,82 +249,22 @@ export const useTrello = (powerUpName: string) => {
     return { scope, visibility, key };
   };
 
-  const getLocalStorage = (
-    scope: Trello.PowerUp.Scope,
-    visibility: Trello.PowerUp.Visibility,
-    key: string,
-    defaultValue: unknown
-  ) => {
-    if (isClient) {
-      const storedValue = window.localStorage.getItem(
-        stringifyLocalStorageKey(scope, visibility, key)
-      );
-      if (storedValue !== null) return JSON.parse(storedValue);
-      return defaultValue;
-    }
-    throw new Error(
-      "Can not access LocalStorage, this is not a Brower Enviroment."
-    );
+  const storedDataRef = ref();
+
+  const updateStoredData = async () => {
+    storedDataRef.value = await getAll();
   };
 
-  const getAllLocalStorage = () => {
-    if (isClient) {
-      const allKeys = Object.keys({ ...window.localStorage }).filter((key) =>
-        key.startsWith(localStorageKeyPrefix)
-      );
-      const allValues = allKeys.map((key) => ({
-        key,
-        value: localStorage.getItem(key),
-      }));
-      const pluginData = allValues.reduce((dataObj: any, item) => {
-        const { scope, visibility, key } = parseLocalStorageKey(item.key);
-        if (!item.value) return dataObj;
-        if (dataObj[scope] === undefined) dataObj[scope] = {};
-        if (dataObj[scope][visibility] === undefined)
-          dataObj[scope][visibility] = {};
-        dataObj[scope][visibility][key] = JSON.parse(item.value);
-        return dataObj;
-      }, {});
-      return pluginData;
-    }
-    throw new Error(
-      "Can not access LocalStorage, this is not a Brower Enviroment."
-    );
+  const getStoredDataRef = () => {
+    onMounted(() => {
+      updateStoredData();
+    });
+    return storedDataRef;
   };
 
-  const setLocalStorage = (
-    scope: Trello.PowerUp.Scope,
-    visibility: Trello.PowerUp.Visibility,
-    key: string,
-    value: unknown
-  ) => {
-    if (isClient) {
-      window.localStorage.setItem(
-        stringifyLocalStorageKey(scope, visibility, key),
-        JSON.stringify(value)
-      );
-      return;
-    }
-    throw new Error(
-      "Can not access LocalStorage, this is not a Brower Enviroment."
-    );
-  };
-
-  const removeLocalStorage = (
-    scope: Trello.PowerUp.Scope,
-    visibility: Trello.PowerUp.Visibility,
-    key: string
-  ) => {
-    if (isClient) {
-      window.localStorage.removeItem(
-        stringifyLocalStorageKey(scope, visibility, key)
-      );
-      return;
-    }
-    throw new Error(
-      "Can not access LocalStorage, this is not a Brower Enviroment."
-    );
-  };
+  /**
+   * handle rerender forced by trello
+   */
 
   const handleRerender = () => {
     updateStoredData();
@@ -254,12 +276,13 @@ export const useTrello = (powerUpName: string) => {
     isTrelloIframe,
     getContext,
     handleIframeResizeRef,
-    initStoredDataRef,
     get,
     getAll,
     getAllFiltered,
     set,
     remove,
+    getStoredDataRef,
+    initStoredDataRef: getStoredDataRef, // deprecaded
     handleRerender,
   };
 };
