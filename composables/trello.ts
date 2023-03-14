@@ -5,10 +5,26 @@ export const T_IFRAME_INIT_HEIGHT = 1;
 export const isClient = process.client && window !== undefined;
 export const PowerUp = (isClient && window.TrelloPowerUp) || null;
 
+/** LocalContext for Testing Purposes outside of Trello Context */
+const LOCAL_CONTEXT = {
+  board: "boardId",
+  card: "cardId",
+  member: "memberId",
+  organization: "organizationId",
+  enterprise: "enterpriseId",
+  permissions: {
+    board: "write",
+    organization: "write",
+    card: "write",
+  },
+  version: "powerUpVersion:1.0",
+} as Trello.PowerUp.Context;
+
 export const useTrello = (powerUpName: string) => {
   const T = PowerUp?.iframe();
-  const getContext = () => PowerUp?.iframe().getContext();
-  const isTrelloIframe = () => !!getContext();
+  const getTrelloContext = () => T?.getContext();
+  const getContext = () => getTrelloContext() || LOCAL_CONTEXT;
+  const isTrelloIframe = () => !!getTrelloContext();
 
   const handleIframeResize = (ref: globalThis.Ref<HTMLElement | undefined>) => {
     if (!isTrelloIframe()) return;
