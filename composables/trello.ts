@@ -56,6 +56,19 @@ export const useTrello = (powerUpName: string) => {
     return ref;
   };
 
+  const storedDataRef = vueRef();
+
+  const updateStoredData = async () => {
+    storedDataRef.value = await getAll();
+  };
+
+  const initStoredDataRef = () => {
+    onMounted(() => {
+      updateStoredData();
+    });
+    return storedDataRef;
+  };
+
   const get = async (
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
@@ -116,8 +129,10 @@ export const useTrello = (powerUpName: string) => {
     if (isTrelloIframe()) {
       // TODO: implement Error handling https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
       await T?.set(scope, visibility, key, value);
+    } else {
+      setLocalStorage(scope, visibility, key, value);
     }
-    return setLocalStorage(scope, visibility, key, value);
+    updateStoredData();
   };
 
   const remove = async (
@@ -229,16 +244,22 @@ export const useTrello = (powerUpName: string) => {
     );
   };
 
+  const handleRerender = () => {
+    updateStoredData();
+  };
+
   return {
     PowerUp,
     T,
     isTrelloIframe,
     getContext,
     handleIframeResizeRef,
+    initStoredDataRef,
     get,
     getAll,
     getAllFiltered,
     set,
     remove,
+    handleRerender,
   };
 };
