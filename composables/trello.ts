@@ -2,9 +2,11 @@ import { Trello } from "~~/types/trello";
 
 export const T_IFRAME_INIT_HEIGHT = 1;
 
+export const isClient = process.client && window !== undefined;
+export const PowerUp = (isClient && window.TrelloPowerUp) || null;
+
 export const useTrello = (powerUpName: string) => {
-  const isClient = process.client && window !== undefined;
-  const PowerUp = (isClient && window.TrelloPowerUp) || null;
+  const T = PowerUp?.iframe();
   const getContext = () => PowerUp?.iframe().getContext();
   const isTrelloIframe = () => !!getContext();
 
@@ -13,7 +15,7 @@ export const useTrello = (powerUpName: string) => {
 
     const resizeIframe = () => {
       if (ref.value) {
-        PowerUp?.iframe().sizeTo(ref.value);
+        T?.sizeTo(ref.value);
       }
     };
 
@@ -42,14 +44,14 @@ export const useTrello = (powerUpName: string) => {
     defaultValue: unknown
   ) => {
     if (isTrelloIframe()) {
-      return await PowerUp?.iframe().get(scope, visibility, key, defaultValue);
+      return await T?.get(scope, visibility, key, defaultValue);
     }
     return getLocalStorage(scope, visibility, key, defaultValue);
   };
 
   const getAll = async () => {
     if (isTrelloIframe()) {
-      return await PowerUp?.iframe().getAll();
+      return await T?.getAll();
     }
     return getAllLocalStorage();
   };
@@ -62,7 +64,7 @@ export const useTrello = (powerUpName: string) => {
   ) => {
     if (isTrelloIframe()) {
       // TODO: implement Error handling https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
-      return await PowerUp?.iframe().set(scope, visibility, key, value);
+      await T?.set(scope, visibility, key, value);
     }
     return setLocalStorage(scope, visibility, key, value);
   };
@@ -73,7 +75,7 @@ export const useTrello = (powerUpName: string) => {
     key: string
   ) => {
     if (isTrelloIframe()) {
-      return await PowerUp?.iframe().remove(scope, visibility, key);
+      return await T?.remove(scope, visibility, key);
     }
     return removeLocalStorage(scope, visibility, key);
   };
@@ -177,7 +179,8 @@ export const useTrello = (powerUpName: string) => {
 
   return {
     PowerUp,
-    isTrelloEnv: isTrelloIframe,
+    T,
+    isTrelloIframe,
     getContext,
     handleIframeResize,
     get,

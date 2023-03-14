@@ -10,21 +10,24 @@
   </div>
 </template>
 
+<script lang="ts">
+import { PowerUp, T_IFRAME_INIT_HEIGHT } from "@/composables/trello";
+import { Trello } from "@/types/trello";
+export const TPU_TIMETRACKER = "TimeTracker";
+</script>
+
 <script setup lang="ts">
-const { PowerUp } = useTrello();
-if (PowerUp) {
-  PowerUp.initialize({
-    "card-back-section": (t) => {
-      return {
-        title: "TimeTracker",
-        icon: "",
-        content: {
-          type: "iframe",
-          url: t.signUrl("./card-timer-list/"),
-          height: T_IFRAME_INIT_HEIGHT,
-        },
-      };
-    },
-  });
-}
+PowerUp?.initialize({
+  "card-back-section": (t) => {
+    return {
+      title: "TimeTracker",
+      icon: "",
+      content: {
+        type: "iframe",
+        url: t.signUrl("./card-timer-list/"),
+        height: T_IFRAME_INIT_HEIGHT,
+      },
+    } as Trello.PowerUp.CardBackSection;
+  },
+});
 </script>
