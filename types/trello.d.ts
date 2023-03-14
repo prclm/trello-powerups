@@ -85,7 +85,9 @@ export namespace Trello {
       ) => PromiseLike<CardBackSection> | CardBackSection;
       "card-badges"?: (
         t: PowerUp.IFrame
-      ) => PromiseLike<(CardBadgeDynamic | CardBadge)[]> | CardBadgeDynamic[];
+      ) =>
+        | PromiseLike<(CardBadgeDynamic | CardBadge)[]>
+        | (CardBadgeDynamic | CardBadge)[];
       "card-buttons"?: (
         t: PowerUp.IFrame
       ) => PromiseLike<CardButton[]> | CardButton[];
@@ -318,14 +320,14 @@ export namespace Trello {
       get(
         scope: Scope | string,
         visibility: Visibility,
-        key?: string,
+        key: string,
         defaultValue?: any
       ): PromiseLike<any>;
       set(
         scope: Scope | string,
         visibility: Visibility,
         key: string,
-        defaultValue?: any
+        value: any
       ): PromiseLike<void>;
       set(
         scope: Scope | string,
