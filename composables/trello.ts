@@ -70,9 +70,9 @@ export const useTrello = (powerUpName: string) => {
 
   const getAll = async () => {
     if (isTrelloIframe()) {
-      return await T?.getAll();
+      return { ...(await T?.getAll()) };
     }
-    return getAllLocalStorage();
+    return { ...getAllLocalStorage() };
   };
 
   const set = async (
@@ -100,7 +100,7 @@ export const useTrello = (powerUpName: string) => {
   };
 
   const localStorageKeyPrefix = `tpu-${powerUpName}`;
-  const localStorageKeySeparator = "_+_";
+  const localStorageKeySeparator = "-+-";
 
   const stringifyLocalStorageKey = (
     scope: string,
@@ -149,10 +149,11 @@ export const useTrello = (powerUpName: string) => {
       }));
       const pluginData = allValues.reduce((dataObj: any, item) => {
         const { scope, visibility, key } = parseLocalStorageKey(item.key);
+        if (!item.value) return dataObj;
         if (dataObj[scope] === undefined) dataObj[scope] = {};
         if (dataObj[scope][visibility] === undefined)
           dataObj[scope][visibility] = {};
-        dataObj[scope][visibility][key] = item.value;
+        dataObj[scope][visibility][key] = JSON.parse(item.value);
         return dataObj;
       }, {});
       return pluginData;
