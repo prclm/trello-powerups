@@ -1,3 +1,5 @@
+export const T_IFRAME_INIT_HEIGHT = 1;
+
 export const useTrello = () => {
   const isClient = process.client && window !== undefined;
   const PowerUp = isClient ? window.TrelloPowerUp : undefined;
