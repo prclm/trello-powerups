@@ -75,6 +75,38 @@ export const useTrello = (powerUpName: string) => {
     return { ...getAllLocalStorage() };
   };
 
+  const getAllFiltered = async ({
+    scope,
+    visibility,
+    filterCallback,
+  }: {
+    scope?: Trello.PowerUp.Scope;
+    visibility?: Trello.PowerUp.Visibility;
+    filterCallback?(key: string): boolean;
+  } = {}) => {
+    const data = { ...(await getAll()) }; // !destructuring to not delete references through filter
+    if (scope || visibility || filterCallback) {
+      Object.keys(data).forEach((scopeKey) => {
+        if (scope && scopeKey !== scope) {
+          delete data[scopeKey];
+        } else if (visibility || filterCallback) {
+          Object.keys(data[scopeKey]).forEach((visibilityKey) => {
+            if (visibility && visibilityKey !== visibility) {
+              delete data[scopeKey][visibilityKey];
+            } else if (filterCallback) {
+              Object.keys(data[scopeKey][visibilityKey]).forEach((key) => {
+                if (filterCallback && !filterCallback(key)) {
+                  delete data[scopeKey][visibilityKey][key];
+                }
+              });
+            }
+          });
+        }
+      });
+    }
+    return data;
+  };
+
   const set = async (
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
@@ -205,6 +237,7 @@ export const useTrello = (powerUpName: string) => {
     handleIframeResizeRef,
     get,
     getAll,
+    getAllFiltered,
     set,
     remove,
   };
