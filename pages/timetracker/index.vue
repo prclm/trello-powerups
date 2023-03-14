@@ -4,7 +4,7 @@
     Hier gibt es nichts zu sehen.
     <ul>
       <li>
-        <NuxtLink to="./card-timer-list/">Card Timer List</NuxtLink>
+        <NuxtLink to="./card-back-section/">Card Back Section</NuxtLink>
       </li>
     </ul>
   </div>
@@ -24,7 +24,7 @@ PowerUp?.initialize({
       icon: "",
       content: {
         type: "iframe",
-        url: t.signUrl("./card-timer-list/"),
+        url: t.signUrl("./card-back-section/"),
         height: T_IFRAME_INIT_HEIGHT,
       },
     } as Trello.PowerUp.CardBackSection;
