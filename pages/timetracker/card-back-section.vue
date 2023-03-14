@@ -7,6 +7,7 @@
 
 <script lang="ts">
 import { TPU_TIMETRACKER } from "./index.vue";
+import { useTrello } from "~~/composables/trello";
 </script>
 
 <script setup lang="ts">

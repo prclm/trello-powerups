@@ -23,6 +23,10 @@ export default defineNuxtConfig({
       ],
     },
   },
+  imports: {
+    autoImport: false,
+  },
+  ssr: true,
   routeRules: {
     "/*": { cors: true },
   },
