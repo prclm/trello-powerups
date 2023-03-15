@@ -267,6 +267,10 @@ export namespace Trello {
 
     type AlertDisplay = "info" | "warning" | "error" | "success";
 
+    type LocalizeKey = string;
+    type LocalizeData = { [data: string]: string | number };
+    type LocalizeKeys = LocalizeKey[] | [LocalizeKey, LocalizeData?][];
+
     // INTERNAL INTERFACES
     interface Localizer {
       resourceDictionary: ResourceDictionary;
@@ -347,13 +351,8 @@ export namespace Trello {
         entries: string[]
       ): PromiseLike<void>;
       safe(html: string): string;
-      localizeKey(
-        key: string,
-        data?: {
-          [key: string]: string;
-        }
-      ): string;
-      localizeKeys(keys: [string | string[]]): string[];
+      localizeKey(key: LocalizeKey, data?: LocalizeData): string;
+      localizeKeys(keys: LocalizeKeys): string[];
       localizeNode(node: Element): void;
       board(...fields: ["all"] | BoardFields[]): PromiseLike<Board>;
       cards(...fields: ["all"] | CardFields[]): PromiseLike<Card[]>;
