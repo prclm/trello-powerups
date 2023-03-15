@@ -95,7 +95,7 @@ export const useTrello = (powerUpName: string) => {
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
     key: string,
-    defaultValue: unknown
+    defaultValue?: unknown
   ) => {
     if (isTrelloIframe()) {
       return await T?.get(scope, visibility, key, defaultValue);
@@ -107,7 +107,7 @@ export const useTrello = (powerUpName: string) => {
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
     key: string,
-    defaultValue: unknown
+    defaultValue?: unknown
   ) => {
     if (isClient) {
       const storedValue = window.localStorage.getItem(
