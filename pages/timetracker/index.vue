@@ -11,8 +11,8 @@
 </template>
 
 <script lang="ts">
-import { PowerUp, T_IFRAME_INIT_HEIGHT } from "@/composables/trello";
-import { Trello } from "@/types/trello";
+import { PowerUp, T_IFRAME_INIT_HEIGHT } from "~~/composables/trello";
+import type { Trello } from "~~/composables/trello.d";
 export const TPU_TIMETRACKER = "TimeTracker";
 </script>
 

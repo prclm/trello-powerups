@@ -1,5 +1,5 @@
 import { onMounted, onUnmounted, ref } from "#imports";
-import { Trello } from "~~/types/trello";
+import type { Trello } from "~~/composables/trello.d";
 
 export const T_IFRAME_INIT_HEIGHT = 1;
 export const TRELLO_CTX_SYMBOL = Symbol(
