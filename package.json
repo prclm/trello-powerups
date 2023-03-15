@@ -6,14 +6,25 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint:js": "eslint --ext \".ts,.js,.vue\" --ignore-path .gitignore .",
-    "lint:format": "prettier --check .",
+    "prepare": "husky install",
+    "lint:js-file": "eslint --ext \".ts,.js,.vue\" --ignore-path .gitignore",
+    "lint:js": "npm run lint:js-file .",
+    "lintfix:js-file": "npm run lint:js-file -- --fix",
+    "lintfix:js": "npm run lint:js -- --fix",
+    "lint:format-file": "prettier --check",
+    "lint:format": "npm run lint:format-file .",
+    "lintfix:format-file": "npm run lint:format-file -- --write",
+    "lintfix:format": "npm run lintfix:format-file .",
     "lint": "npm run lint:js && npm run lint:format",
-    "lintfix": "prettier --write --list-different . && npm run lint:js --fix",
-    "prepare": "husky install"
+    "lintfix": "npm run lintfix:format && npm run lintfix:js"
   },
   "lint-staged": {
-    "*": "npm run lintfix"
+    "*": [
+      "npm run lintfix:format-file"
+    ],
+    "*.js|*.ts|*.vue": [
+      "npm run lintfix:js-file --"
+    ]
   },
   "devDependencies": {
     "@nuxtjs/eslint-config-typescript": "^12.0.0",
