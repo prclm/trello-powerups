@@ -324,7 +324,7 @@ export namespace Trello {
       get(
         scope: Scope | string,
         visibility: Visibility,
-        key: string,
+        key?: string,
         defaultValue?: any
       ): PromiseLike<any>;
       set(
