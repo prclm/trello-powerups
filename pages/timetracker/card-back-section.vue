@@ -11,7 +11,13 @@ import { useTrello } from "~~/composables/trello";
 </script>
 
 <script setup lang="ts">
-const trelloInstance = useTrello(TPU_TIMETRACKER);
+const trelloInstance = useTrello(TPU_TIMETRACKER, {
+  localization: {
+    defaultLocale: "de",
+    supportedLocales: ["de", "en"],
+    resourceUrl: "/locale/_all-{locale}.json",
+  },
+});
 
 const {
   T,

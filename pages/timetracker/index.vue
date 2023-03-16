@@ -17,17 +17,26 @@ export const TPU_TIMETRACKER = "TimeTracker";
 </script>
 
 <script setup lang="ts">
-PowerUp?.initialize({
-  "card-back-section": (t) => {
-    return {
-      title: "TimeTracker",
-      icon: "",
-      content: {
-        type: "iframe",
-        url: t.signUrl("./card-back-section/"),
-        height: T_IFRAME_INIT_HEIGHT,
-      },
-    } as Trello.PowerUp.CardBackSection;
+PowerUp?.initialize(
+  {
+    "card-back-section": (t) => {
+      return {
+        title: "TimeTracker",
+        icon: "",
+        content: {
+          type: "iframe",
+          url: t.signUrl("./card-back-section/"),
+          height: T_IFRAME_INIT_HEIGHT,
+        },
+      } as Trello.PowerUp.CardBackSection;
+    },
   },
-});
+  {
+    localization: {
+      defaultLocale: "de",
+      supportedLocales: ["de", "en"],
+      resourceUrl: "/locale/_all-{locale}.json",
+    },
+  }
+);
 </script>

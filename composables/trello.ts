@@ -25,9 +25,12 @@ const LOCAL_CONTEXT = {
   version: "powerUpVersion:1.0",
 } as Trello.PowerUp.Context;
 
-export const useTrello = (powerUpName: string) => {
+export const useTrello = (
+  powerUpName: string,
+  iframeOptions: Trello.PowerUp.IFrameOptions
+) => {
   /** T as the trello api Object */
-  const T = PowerUp?.iframe();
+  const T = PowerUp?.iframe(iframeOptions);
 
   /**
    * provide the trello context OR LOCAL_CONTEXT for testing
@@ -305,6 +308,49 @@ export const useTrello = (powerUpName: string) => {
   };
 
   /**
+   * Localization
+   *
+   * - wrapper functions that returns the given string as fallback incl. search/replace data
+   *
+   * localizeKey()
+   */
+
+  type LocalizeKey = string;
+  type LocalizeData = { [data: string]: string | number };
+  type LocalizeKeys = LocalizeKey[] | [LocalizeKey, LocalizeData?][];
+
+  const localizeKey = (key: LocalizeKey, data?: LocalizeData) => {
+    try {
+      /** try to load translations from trello */
+      if (!T) throw new Notification("no trello context: do catch");
+      return T?.localizeKey(key, data);
+    } catch (e) {
+      /** else search/replace the given string */
+      if (data) {
+        Object.entries(data).forEach(([search, replace]) => {
+          key = key.replaceAll(`{${search}}`, replace.toString());
+        });
+      }
+      return key;
+    }
+  };
+
+  const localizeKeys = (keys: LocalizeKeys) => {
+    try {
+      /** try to load translations from trello */
+      if (!T) throw new Notification("no trello context: do catch");
+      return T?.localizeKeys(keys);
+    } catch (e) {
+      /** else search/replace the given string */
+      return keys.map((item) => {
+        if (typeof item === "string") return localizeKey(item);
+        const [key, data] = item;
+        return localizeKey(key, data);
+      });
+    }
+  };
+
+  /**
    * handle rerender forced by trello
    */
 
@@ -323,7 +369,8 @@ export const useTrello = (powerUpName: string) => {
     set,
     remove,
     getStoredDataRef,
-    initStoredDataRef: getStoredDataRef, // deprecaded
+    localizeKey,
+    localizeKeys,
     handleRerender,
   };
 };
