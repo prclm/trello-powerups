@@ -79,7 +79,6 @@ export const useTrello = (powerUpName: string) => {
    * - getLocalStorage() (private)
    * - getAll()
    * - getAllLocalStorage() (private)
-   * - getAllFiltered()
    * - set()
    * - setLocalStorage() (private)
    * - remove()
@@ -94,13 +93,17 @@ export const useTrello = (powerUpName: string) => {
   const get = async (
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
-    key: string,
+    key?: string,
     defaultValue?: unknown
   ) => {
     if (isTrelloIframe()) {
       return await T?.get(scope, visibility, key, defaultValue);
     }
-    return getLocalStorage(scope, visibility, key, defaultValue);
+    if (key) {
+      return getLocalStorage(scope, visibility, key, defaultValue);
+    } else {
+      return getAllLocalStorage(scope, visibility) || defaultValue;
+    }
   };
 
   const getLocalStorage = (
@@ -110,6 +113,10 @@ export const useTrello = (powerUpName: string) => {
     defaultValue?: unknown
   ) => {
     if (isClient) {
+      if (scope === LOCAL_CONTEXT.card) {
+        // this mimics the get data by cardId option for localStorage
+        scope = "card";
+      }
       const storedValue = window.localStorage.getItem(
         stringifyLocalStorageKey(scope, visibility, key)
       );
@@ -118,23 +125,39 @@ export const useTrello = (powerUpName: string) => {
     }
   };
 
-  const getAll = async () => {
+  const getAll = async (
+    scope?: Trello.PowerUp.Scope,
+    visibility?: Trello.PowerUp.Visibility,
+    filterCallback?: (key: string) => boolean
+  ) => {
     if (isTrelloIframe()) {
-      return { ...(await T?.getAll()) };
+      return filterStorageData(await T?.getAll(), {
+        scope,
+        visibility,
+        filterCallback,
+      });
     }
-    return { ...getAllLocalStorage() };
+    return {
+      ...getAllLocalStorage(scope, visibility, filterCallback),
+    };
   };
 
-  const getAllLocalStorage = () => {
+  const getAllLocalStorage = (
+    scope?: Trello.PowerUp.Scope,
+    visibility?: Trello.PowerUp.Visibility,
+    filterCallback?: (key: string) => boolean
+  ) => {
     if (isClient) {
-      const allKeys = Object.keys({ ...window.localStorage }).filter((key) =>
+      const allKeys = Object.keys({ ...window.localStorage });
+      const filteredKeys = allKeys.filter((key) =>
         key.startsWith(localStorageKeyPrefix)
       );
-      const allValues = allKeys.map((key) => ({
+      if (Object.keys(filteredKeys).length === 0) return null;
+      const allKeyValues = filteredKeys.map((key) => ({
         key,
         value: localStorage.getItem(key),
       }));
-      const pluginData = allValues.reduce((dataObj: any, item) => {
+      const pluginData = allKeyValues.reduce((dataObj: any, item) => {
         const { scope, visibility, key } = parseLocalStorageKey(item.key);
         if (!item.value) return dataObj;
         if (dataObj[scope] === undefined) dataObj[scope] = {};
@@ -143,20 +166,27 @@ export const useTrello = (powerUpName: string) => {
         dataObj[scope][visibility][key] = JSON.parse(item.value);
         return dataObj;
       }, {});
-      return pluginData;
+      return filterStorageData(pluginData, {
+        scope,
+        visibility,
+        filterCallback,
+      });
     }
   };
 
-  const getAllFiltered = async ({
-    scope,
-    visibility,
-    filterCallback,
-  }: {
-    scope?: Trello.PowerUp.Scope;
-    visibility?: Trello.PowerUp.Visibility;
-    filterCallback?(key: string): boolean;
-  } = {}) => {
-    const data = { ...(await getAll()) }; // !destructuring to not delete references through filter
+  const filterStorageData = (
+    data: any,
+    {
+      scope,
+      visibility,
+      filterCallback,
+    }: {
+      scope?: Trello.PowerUp.Scope;
+      visibility?: Trello.PowerUp.Visibility;
+      filterCallback?(key: string): boolean;
+    } = {}
+  ) => {
+    data = { ...data }; // !destructuring to not delete references through filter
     if (scope || visibility || filterCallback) {
       Object.keys(data).forEach((scopeKey) => {
         if (scope && scopeKey !== scope) {
@@ -179,6 +209,7 @@ export const useTrello = (powerUpName: string) => {
     return data;
   };
 
+  // TODO: also allow multiple entries with {key: value} pairs
   const set = async (
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
@@ -201,6 +232,10 @@ export const useTrello = (powerUpName: string) => {
     value: unknown
   ) => {
     if (isClient) {
+      if (scope === LOCAL_CONTEXT.card) {
+        // this mimics the get data by cardId option for localStorage
+        scope = "card";
+      }
       window.localStorage.setItem(
         stringifyLocalStorageKey(scope, visibility, key),
         JSON.stringify(value)
@@ -208,15 +243,18 @@ export const useTrello = (powerUpName: string) => {
     }
   };
 
+  // TODO: also allow multiple entries with {key: value} pairs
   const remove = async (
     scope: Trello.PowerUp.Scope,
     visibility: Trello.PowerUp.Visibility,
     key: string
   ) => {
     if (isTrelloIframe()) {
-      return await T?.remove(scope, visibility, key);
+      await T?.remove(scope, visibility, key);
+    } else {
+      removeLocalStorage(scope, visibility, key);
     }
-    return removeLocalStorage(scope, visibility, key);
+    updateStoredData();
   };
 
   const removeLocalStorage = (
@@ -224,6 +262,10 @@ export const useTrello = (powerUpName: string) => {
     visibility: Trello.PowerUp.Visibility,
     key: string
   ) => {
+    if (scope === LOCAL_CONTEXT.card) {
+      // this mimics the get data by cardId option for localStorage
+      scope = "card";
+    }
     if (isClient) {
       window.localStorage.removeItem(
         stringifyLocalStorageKey(scope, visibility, key)
@@ -232,8 +274,8 @@ export const useTrello = (powerUpName: string) => {
   };
 
   const stringifyLocalStorageKey = (
-    scope: string,
-    visibility: string,
+    scope: Trello.PowerUp.Scope,
+    visibility: Trello.PowerUp.Visibility,
     key: string
   ) => {
     return [localStorageKeyPrefix, scope, visibility, key].join(
@@ -278,7 +320,6 @@ export const useTrello = (powerUpName: string) => {
     handleIframeResizeRef,
     get,
     getAll,
-    getAllFiltered,
     set,
     remove,
     getStoredDataRef,
