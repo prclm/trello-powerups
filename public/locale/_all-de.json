@@ -1,1 +1,5 @@
-{}
+{
+  "Error: Trello's data limit is reached for this plugin.": "Fehler: Trellos Datenlimit ist für dieses Plugin erreicht.",
+  "Error: Trello's data limit for \"{scope}\" is reached for this plugin.": "Fehler: Trellos Datenlimit für den Bereich \"{scope}\" ist für dieses Plugin erreicht.",
+  "Error: Trello's data limit for \"{scope}/{visibility}\" is reached for this plugin.": "Fehler: Trellos Datenlimit für den Bereich \"{scope}/{visibility}\" ist für dieses Plugin erreicht."
+}

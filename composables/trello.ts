@@ -220,8 +220,28 @@ export const useTrello = (
     value: unknown
   ) => {
     if (isTrelloIframe()) {
-      // TODO: implement Error handling https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
-      await T?.set(scope, visibility, key, value);
+      try {
+        await T?.set(scope, visibility, key, value);
+      } catch (err) {
+        // error handling data size limit https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
+        if (
+          err instanceof Error &&
+          err.message.includes("PluginData length of 4096 characters exceeded.")
+        ) {
+          T?.alert({
+            message: localizeKey(
+              'Error: Trello\'s data limit for "{scope}/{visibility}" is reached for this plugin.',
+              { scope, visibility }
+            ),
+            duration: 30,
+          });
+          // maybe use an attachment later to advertise pro version
+          // T?.attach({
+          //   name: "buy our pro version",
+          //   url: "URL",
+          // });
+        }
+      }
     } else {
       setLocalStorage(scope, visibility, key, value);
     }
@@ -369,6 +389,7 @@ export const useTrello = (
     set,
     remove,
     getStoredDataRef,
+    initStoredDataRef: getStoredDataRef, // deprecaded
     localizeKey,
     localizeKeys,
     handleRerender,
