@@ -7,20 +7,23 @@
 
 <script lang="ts">
 import { TPU_TIMETRACKER } from "./index.vue";
-import { useTrello } from "~~/composables/trello";
+import { PowerUp, useTrello } from "~~/composables/trello";
 </script>
 
 <script setup lang="ts">
-const trelloInstance = useTrello(TPU_TIMETRACKER, {
-  localization: {
-    defaultLocale: "de",
-    supportedLocales: ["de", "en"],
-    resourceUrl: "/locale/_all-{locale}.json",
-  },
-});
+const trelloInstance = useTrello(
+  TPU_TIMETRACKER,
+  PowerUp?.iframe({
+    localization: {
+      defaultLocale: "de",
+      supportedLocales: ["de", "en"],
+      resourceUrl: "/locale/_all-{locale}.json",
+    },
+  })
+);
 
 const {
-  T,
+  t,
   handleIframeResizeRef,
   initStoredDataRef,
   handleRerender: handleTrelloRerender,
@@ -28,7 +31,7 @@ const {
 const wrapper = handleIframeResizeRef();
 const storage = initStoredDataRef();
 
-T?.render(() => {
+t?.render(() => {
   handleTrelloRerender();
 });
 </script>

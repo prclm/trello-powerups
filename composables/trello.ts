@@ -6,8 +6,9 @@ export const TRELLO_CTX_SYMBOL = Symbol(
   "trello iframe context provider identifier"
 );
 
-/** get the TrelloPowerUp Object from window if in browser enviroment */
+/** check if is client environment */
 export const isClient = process.client && window !== undefined;
+/** get the TrelloPowerUp Object from window if in browser enviroment */
 export const PowerUp = (isClient && window.TrelloPowerUp) || null;
 
 /** LocalContext for Testing Purposes outside of Trello Context */
@@ -25,22 +26,15 @@ const LOCAL_CONTEXT = {
   version: "powerUpVersion:1.0",
 } as Trello.PowerUp.Context;
 
-export const useTrello = (
-  powerUpName: string,
-  iframeOptions: Trello.PowerUp.IFrameOptions
-) => {
-  /** T as the trello api Object */
-  const T = PowerUp?.iframe(iframeOptions);
-
+export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   /**
    * provide the trello context OR LOCAL_CONTEXT for testing
    * https://developer.atlassian.com/cloud/trello/power-ups/client-library/t-getcontext/#t-getcontext--
    */
-  const getTrelloContext = () => T?.getContext();
-  const getContext = () => getTrelloContext() || LOCAL_CONTEXT;
+  const getContext = () => (t ? t.getContext() : LOCAL_CONTEXT);
 
   /** helper function that proofs the trello context */
-  const isTrelloIframe = () => !!getTrelloContext();
+  const isTrelloIframe = () => !!t;
 
   /**
    * handleIframeResizeRef provides a ref for the iframe container
@@ -52,7 +46,7 @@ export const useTrello = (
     if (!isTrelloIframe()) return refEl;
 
     const resizeIframe = () => {
-      refEl.value && T?.sizeTo(refEl.value);
+      refEl.value && t?.sizeTo(refEl.value);
     };
 
     const resizeIframeObserver = isClient
@@ -100,7 +94,7 @@ export const useTrello = (
     defaultValue?: unknown
   ) => {
     if (isTrelloIframe()) {
-      return await T?.get(scope, visibility, key, defaultValue);
+      return await t?.get(scope, visibility, key, defaultValue);
     }
     if (key) {
       return getLocalStorage(scope, visibility, key, defaultValue);
@@ -134,7 +128,7 @@ export const useTrello = (
     filterCallback?: (key: string) => boolean
   ) => {
     if (isTrelloIframe()) {
-      return filterStorageData(await T?.getAll(), {
+      return filterStorageData(await t?.getAll(), {
         scope,
         visibility,
         filterCallback,
@@ -221,14 +215,14 @@ export const useTrello = (
   ) => {
     if (isTrelloIframe()) {
       try {
-        await T?.set(scope, visibility, key, value);
+        await t?.set(scope, visibility, key, value);
       } catch (err) {
         // error handling data size limit https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
         if (
           err instanceof Error &&
           err.message.includes("PluginData length of 4096 characters exceeded.")
         ) {
-          T?.alert({
+          t?.alert({
             message: localizeKey(
               'Error: Trello\'s data limit for "{scope}/{visibility}" is reached for this plugin.',
               { scope, visibility }
@@ -273,7 +267,7 @@ export const useTrello = (
     key: string
   ) => {
     if (isTrelloIframe()) {
-      await T?.remove(scope, visibility, key);
+      await t?.remove(scope, visibility, key);
     } else {
       removeLocalStorage(scope, visibility, key);
     }
@@ -342,8 +336,8 @@ export const useTrello = (
   const localizeKey = (key: LocalizeKey, data?: LocalizeData) => {
     try {
       /** try to load translations from trello */
-      if (!T) throw new Notification("no trello context: do catch");
-      return T?.localizeKey(key, data);
+      if (!t) throw new Notification("no trello context: do catch");
+      return t?.localizeKey(key, data);
     } catch (e) {
       /** else search/replace the given string */
       if (data) {
@@ -358,8 +352,8 @@ export const useTrello = (
   const localizeKeys = (keys: LocalizeKeys) => {
     try {
       /** try to load translations from trello */
-      if (!T) throw new Notification("no trello context: do catch");
-      return T?.localizeKeys(keys);
+      if (!t) throw new Notification("no trello context: do catch");
+      return t?.localizeKeys(keys);
     } catch (e) {
       /** else search/replace the given string */
       return keys.map((item) => {
@@ -379,8 +373,7 @@ export const useTrello = (
   };
 
   return {
-    PowerUp,
-    T,
+    t,
     isTrelloIframe,
     getContext,
     handleIframeResizeRef,
@@ -389,7 +382,6 @@ export const useTrello = (
     set,
     remove,
     getStoredDataRef,
-    initStoredDataRef: getStoredDataRef, // deprecaded
     localizeKey,
     localizeKeys,
     handleRerender,
