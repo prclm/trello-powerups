@@ -1,42 +1,60 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div>
-    TimeTracker PowerUp wird initialisiert...
-    <ul>
-      <li>
-        <NuxtLink to="./card-back-section/">Card Back Section</NuxtLink>
-      </li>
-    </ul>
+    <div class="header">
+      <h1>developer view for local testing</h1>
+      <p>links to PowerUp iframes:</p>
+      <ul>
+        <li>
+          <NuxtLink to="./initialize/">Initialize Iframe</NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="./card-back-section/">Card Back Section</NuxtLink>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <button @click="() => addTimerList()">newList</button>
+      <TimeTrackerTimerLists />
+    </div>
+
+    <StoragePrinter />
   </div>
 </template>
 
 <script lang="ts">
-import { PowerUp, T_IFRAME_INIT_HEIGHT } from "~~/composables/trello";
-import type { Trello } from "~~/composables/trello.d";
-export const TPU_TIMETRACKER = "TimeTracker";
+import { provide } from "#imports";
+import { useTrello, TRELLO_CTX_SYMBOL } from "~~/composables/trello";
+import {
+  POWERUP_NAME,
+  useTimetracker,
+  TIMETRACKER_CTX_SYMBOL,
+} from "~~/composables/timetracker";
 </script>
 
 <script setup lang="ts">
-PowerUp?.initialize(
-  {
-    "card-back-section": (t) => {
-      return {
-        title: "TimeTracker",
-        icon: "",
-        content: {
-          type: "iframe",
-          url: t.signUrl("./card-back-section/"),
-          height: T_IFRAME_INIT_HEIGHT,
-        },
-      } as Trello.PowerUp.CardBackSection;
-    },
-  },
-  {
-    localization: {
-      defaultLocale: "de",
-      supportedLocales: ["de", "en"],
-      resourceUrl: "/locale/_all-{locale}.json",
-    },
-  }
-);
+/** create and provide trello iframe context */
+const trelloCtx = useTrello(POWERUP_NAME);
+provide(TRELLO_CTX_SYMBOL, trelloCtx);
+
+/** create and provide timetracker context */
+const timetrackerCtx = useTimetracker(trelloCtx, true);
+const { addTimerList } = timetrackerCtx;
+provide(TIMETRACKER_CTX_SYMBOL, timetrackerCtx);
 </script>
+
+<style lang="scss">
+:root {
+  overflow: initial;
+}
+.header {
+  margin-bottom: 2em;
+  padding: 1em;
+  background: black;
+  &,
+  a {
+    color: white;
+  }
+}
+</style>

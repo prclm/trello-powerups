@@ -1,0 +1,22 @@
+{
+  "Time recording": "Zeiterfassung",
+  "Timerlist": "Timerliste",
+
+  "Start recording": "Aufzeichnung starten",
+  "Stop recording": "Aufzeichnung stoppen",
+
+  "Delete timer": "Timer löschen",
+  "Please confirm that you want to delete this recording.": "Bitte bestätigen Sie, dass Sie diese Aufnahme löschen möchten.",
+  "Of course, delete!": "Natürlich, löschen!",
+  "Oh no, don't!": "Oh nein, bloß nicht!",
+
+  "Error: We could not stop your last timer. Maybe the timer or card has been deleted?": "Fehler: Wir konntent deinen letzten Timer nicht stoppen. Vielleicht wurde er oder die Karte gelöscht?",
+
+  "Start something new today!": "Starte heute etwas Neues!",
+  "What`s up next?": "Was steht als nächstes an?",
+  "Be fantastic!": "Seid phantastisch!",
+  "It's time for …": "Es ist Zeit für …",
+  "I'm going to start right now!": "Ich werde sofort damit anfangen!",
+  "This will be great!": "Das wird großartig werden!",
+  "let's go …": "los geht's …"
+}
