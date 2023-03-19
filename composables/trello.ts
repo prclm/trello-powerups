@@ -361,34 +361,41 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   type LocalizeKeys = LocalizeKey[] | [LocalizeKey, LocalizeData?][];
 
   const localizeKey = (key: LocalizeKey, data?: LocalizeData) => {
-    try {
-      /** try to load translations from trello */
-      if (!t) throw new Notification("no trello context: do catch");
-      return t?.localizeKey(key, data);
-    } catch (e) {
-      /** else search/replace the given string */
-      if (data) {
-        Object.entries(data).forEach(([search, replace]) => {
-          key = key.replaceAll(`{${search}}`, replace.toString());
-        });
+    if (t && t.localizeKey) {
+      /** try to load translation from trello */
+      try {
+        return t.localizeKey(key, data);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Could not load translation from trello.", e);
       }
-      return key;
     }
+
+    /** else search/replace the given string */
+    if (data) {
+      Object.entries(data).forEach(([search, replace]) => {
+        key = key.replaceAll(`{${search}}`, replace.toString());
+      });
+    }
+    return key;
   };
 
   const localizeKeys = (keys: LocalizeKeys) => {
-    try {
+    if (t && t.localizeKeys) {
       /** try to load translations from trello */
-      if (!t) throw new Notification("no trello context: do catch");
-      return t?.localizeKeys(keys);
-    } catch (e) {
-      /** else search/replace the given string */
-      return keys.map((item) => {
-        if (typeof item === "string") return localizeKey(item);
-        const [key, data] = item;
-        return localizeKey(key, data);
-      });
+      try {
+        return t.localizeKeys(keys) as string[];
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Could not load translations from trello.", e);
+      }
     }
+    /** else load strings one by one */
+    return keys.map((item) => {
+      if (typeof item === "string") return localizeKey(item);
+      const [key, data] = item;
+      return localizeKey(key, data);
+    });
   };
 
   /**
