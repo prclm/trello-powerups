@@ -4,9 +4,24 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start Caddy & Ngrok Proxy",
+      "label": "Start Caddy Docker & Ngrok Proxy",
       "type": "shell",
       "command": "docker compose up -d && ngrok http --host-header=rewrite 443"
+    },
+    {
+      "label": "Start Caddy Local & Ngrok Proxy",
+      "type": "shell",
+      "command": "sudo caddy start --config Caddyfile && ngrok http --host-header=rewrite 443"
+    },
+    {
+      "label": "Stop Caddy",
+      "type": "shell",
+      "command": "sudo caddy stop"
+    },
+    {
+      "label": "Start Ngrok Proxy",
+      "type": "shell",
+      "command": "ngrok http --host-header=rewrite 5555"
     }
   ]
 }
