@@ -92,13 +92,18 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   const localStorageKeySeparator = "-+-";
 
   const get = async (
-    scope: Trello.PowerUp.Scope,
+    scope: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility: Trello.PowerUp.Visibility,
     key?: string,
     defaultValue?: unknown
   ) => {
-    if (isTrelloIframe()) {
-      return await t?.get(scope, visibility, key, defaultValue);
+    if (t && t.get) {
+      try {
+        return await t.get(scope, visibility, key, defaultValue);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Could not get data from trello.", e);
+      }
     }
     if (key) {
       return getLocalStorage(scope, visibility, key, defaultValue);
@@ -108,7 +113,7 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   };
 
   const getLocalStorage = (
-    scope: Trello.PowerUp.Scope,
+    scope: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility: Trello.PowerUp.Visibility,
     key: string,
     defaultValue?: unknown
@@ -127,16 +132,23 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   };
 
   const getAll = async (
-    scope?: Trello.PowerUp.Scope,
+    scope?: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility?: Trello.PowerUp.Visibility,
     filterCallback?: (key: string) => boolean
   ) => {
-    if (isTrelloIframe()) {
-      return filterStorageData(await t?.getAll(), {
-        scope,
-        visibility,
-        filterCallback,
-      });
+    if (t && t.getAll) {
+      try {
+        const data = await t.getAll();
+        return filterStorageData(data, {
+          scope,
+          visibility,
+          filterCallback,
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Could not get data from trello.", e);
+        return;
+      }
     }
     return {
       ...getAllLocalStorage(scope, visibility, filterCallback),
@@ -144,11 +156,15 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   };
 
   const getAllLocalStorage = (
-    scope?: Trello.PowerUp.Scope,
+    scope?: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility?: Trello.PowerUp.Visibility,
     filterCallback?: (key: string) => boolean
   ) => {
     if (isClient) {
+      if (scope === LOCAL_CONTEXT.card) {
+        // this mimics the get data by cardId option for localStorage
+        scope = "card";
+      }
       const allKeys = Object.keys({ ...window.localStorage });
       const filteredKeys = allKeys.filter((key) =>
         key.startsWith(localStorageKeyPrefix)
@@ -182,7 +198,7 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
       visibility,
       filterCallback,
     }: {
-      scope?: Trello.PowerUp.Scope;
+      scope?: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"];
       visibility?: Trello.PowerUp.Visibility;
       filterCallback?(key: string): boolean;
     } = {}
@@ -212,42 +228,42 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
 
   // TODO: also allow multiple entries with {key: value} pairs
   const set = async (
-    scope: Trello.PowerUp.Scope,
+    scope: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility: Trello.PowerUp.Visibility,
     key: string,
     value: unknown
   ) => {
-    if (isTrelloIframe()) {
+    if (t && t.set) {
       try {
-        await t?.set(scope, visibility, key, value);
-      } catch (err) {
-        // error handling data size limit https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
+        await t.set(scope, visibility, key, value);
+        updateStoredData();
+        return;
+      } catch (e) {
         if (
-          err instanceof Error &&
-          err.message.includes("PluginData length of 4096 characters exceeded.")
+          e instanceof Error &&
+          e.message.includes("PluginData length of 4096 characters exceeded.")
         ) {
-          t?.alert({
+          // error handling data size limit https://developer.atlassian.com/cloud/trello/power-ups/client-library/getting-and-setting-data/#errors
+          t.alert({
             message: localizeKey(
               'Error: Trello\'s data limit for "{scope}/{visibility}" is reached for this plugin.',
               { scope, visibility }
             ),
             duration: 30,
           });
-          // maybe use an attachment later to advertise pro version
-          // T?.attach({
-          //   name: "buy our pro version",
-          //   url: "URL",
-          // });
+        } else {
+          // eslint-disable-next-line no-console
+          console.error("Could not set data to trello.", e);
         }
+        return;
       }
-    } else {
-      setLocalStorage(scope, visibility, key, value);
     }
+    setLocalStorage(scope, visibility, key, value);
     updateStoredData();
   };
 
   const setLocalStorage = (
-    scope: Trello.PowerUp.Scope,
+    scope: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility: Trello.PowerUp.Visibility,
     key: string,
     value: unknown
@@ -270,11 +286,18 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
     visibility: Trello.PowerUp.Visibility,
     key: string
   ) => {
-    if (isTrelloIframe()) {
-      await t?.remove(scope, visibility, key);
-    } else {
-      removeLocalStorage(scope, visibility, key);
+    if (t && t.remove) {
+      try {
+        await t.remove(scope, visibility, key);
+        updateStoredData();
+        return;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Could not delete data from trello.", e);
+        return;
+      }
     }
+    removeLocalStorage(scope, visibility, key);
     updateStoredData();
   };
 
@@ -295,7 +318,7 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
   };
 
   const stringifyLocalStorageKey = (
-    scope: Trello.PowerUp.Scope,
+    scope: Trello.PowerUp.Scope | Trello.PowerUp.Card["id"],
     visibility: Trello.PowerUp.Visibility,
     key: string
   ) => {
