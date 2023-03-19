@@ -46,7 +46,11 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
     if (!isTrelloIframe()) return refEl;
 
     const resizeIframe = () => {
-      refEl.value && t?.sizeTo(refEl.value);
+      let resizeTo: number | HTMLElement = 1;
+      if (refEl.value && refEl.value.clientHeight > 0) {
+        resizeTo = refEl.value;
+      }
+      t?.sizeTo(resizeTo);
     };
 
     const resizeIframeObserver = isClient
