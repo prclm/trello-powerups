@@ -353,6 +353,9 @@ export const useTrello = (powerUpName: string, t?: Trello.PowerUp.IFrame) => {
    *
    * - wrapper functions that returns the given string as fallback incl. search/replace data
    *
+   * // FIXME: Translations are not availiable on the initial render.
+   * docs: https://developer.atlassian.com/cloud/trello/power-ups/client-library/localization/#localization-in-iframes-other-than-the-connector
+   *
    * localizeKey()
    */
 
