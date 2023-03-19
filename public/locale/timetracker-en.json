@@ -1,0 +1,22 @@
+{
+  "Time recording": "Time recording",
+  "Timerlist": "Timerlist",
+
+  "Start recording": "Start recording",
+  "Stop recording": "Stop recording",
+  "Delete timer": "Delete timer",
+
+  "Please confirm that you want to delete this recording.": "Please confirm that you want to delete this recording.",
+  "Of course, delete!": "Of course, delete!",
+  "Oh no, don't!": "Oh no, don't!",
+
+  "Error: We could not stop your last timer. Maybe the timer or card has been deleted?": "Error: We could not stop your last timer. Maybe the timer or card has been deleted?",
+
+  "Start something new today!": "Start something new today!",
+  "What`s up next?": "What`s up next?",
+  "Be fantastic!": "Be fantastic!",
+  "It's time for …": "It's time for …",
+  "I'm going to start right now!": "I'm going to start right now!",
+  "This will be great!": "This will be great!",
+  "let's go …": "let's go …"
+}
