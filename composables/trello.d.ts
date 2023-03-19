@@ -265,6 +265,8 @@ export namespace Trello {
       | "light-gray"
       | "business-blue";
 
+    type ColorsWeight = 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+
     type AlertDisplay = "info" | "warning" | "error" | "success";
 
     type LocalizeKey = string;
@@ -291,7 +293,7 @@ export namespace Trello {
 
     interface Util {
       color: {
-        getHexString(): string;
+        getHexString(color: Colors, weight?: ColorsWeight): string;
         namedColorStringToHex(): string;
       };
 
@@ -322,31 +324,31 @@ export namespace Trello {
       requestWithContext(command: string, options: any): PromiseLike<any>;
       getAll(): PromiseLike<any>;
       get(
-        scope: Scope | string,
+        scope: Scope | Card["id"],
         visibility: Visibility,
         key?: string,
         defaultValue?: any
       ): PromiseLike<any>;
       set(
-        scope: Scope | string,
+        scope: Scope | Card["id"],
         visibility: Visibility,
         key: string,
         value: any
       ): PromiseLike<void>;
       set(
-        scope: Scope | string,
+        scope: Scope | Card["id"],
         visibility: Visibility,
         entries: {
           [key: string]: any;
         }
       ): PromiseLike<void>;
       remove(
-        scope: Scope | string,
+        scope: Scope | Card["id"],
         visibility: Visibility,
         key: string
       ): PromiseLike<void>;
       remove(
-        scope: Scope | string,
+        scope: Scope | Card["id"],
         visibility: Visibility,
         entries: string[]
       ): PromiseLike<void>;
