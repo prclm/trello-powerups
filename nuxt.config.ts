@@ -23,6 +23,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+  css: ["@/assets/scss/global.scss"],
   imports: {
     autoImport: false,
   },
