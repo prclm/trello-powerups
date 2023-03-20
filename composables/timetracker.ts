@@ -245,23 +245,28 @@ export const useTimetracker = (
 
     /**
      * // TODO: is it possible to get the keyboard focus inside the popup iframe?
+     * // TODO: change the confirm method to own UI, t.popup() is not accessable for keyboard users and not available in local dev env
      */
-    t?.popup({
-      type: "confirm",
-      title,
-      message,
-      confirmText,
-      cancelText,
-      confirmStyle: "danger",
-      onConfirm: async (t) => {
-        await deleteTimer(timerListId, timerId, scope);
-        t.closePopup();
-      },
-      onCancel: async (t) => {
-        await t.closePopup();
-      },
-      mouseEvent: event as MouseEvent,
-    });
+    if (t) {
+      t.popup({
+        type: "confirm",
+        title,
+        message,
+        confirmText,
+        cancelText,
+        confirmStyle: "danger",
+        onConfirm: async (t) => {
+          await deleteTimer(timerListId, timerId, scope);
+          t.closePopup();
+        },
+        onCancel: async (t) => {
+          await t.closePopup();
+        },
+        mouseEvent: event as MouseEvent,
+      });
+      return;
+    }
+    deleteTimer(timerListId, timerId, scope);
   };
 
   const deleteTimer = async (
