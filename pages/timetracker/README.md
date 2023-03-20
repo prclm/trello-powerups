@@ -11,6 +11,23 @@ This PowerUp is in beta development. What can it do right now?
 <hr/>
 <br/>
 
-# Release beta-1.0
+## How to install
 
-<blockquote class="trello-card"><a href="https:&#x2F;&#x2F;trello.com&#x2F;c&#x2F;d40KSUlI&#x2F;40-releasenotes-beta-10">ReleaseNotes - beta-1.0</a></blockquote><script src="https://p.trellocdn.com/embed.min.js"></script>
+- Create a Trello User if you don't already have on.
+- Login to [Power-Up Admin Portal](https://trello.com/power-ups/admin).
+- Follow [this instructions](https://developer.atlassian.com/cloud/trello/guides/power-ups/managing-power-ups/#adding-a-new-custom-power-up) to create a new PowerUp that is only available in your own Trello Workspace.
+- Use the following URL as the Iframe-Konnektor-URL in the [Basic Informations](https://developer.atlassian.com/cloud/trello/guides/power-ups/managing-power-ups/#basic-information).
+  - https://trello-powerups-prclm.vercel.app/timetracker/initialize/
+- Activate the following [Capabilities](https://developer.atlassian.com/cloud/trello/guides/power-ups/managing-power-ups/#capabilities):
+  - ["card-buttons"]
+  - ["card-back-section"]
+  - ... this list gets updated for future PowerUp features
+- Go to any Trello Board of your Workspace and activate the new PowerUp.
+
+<br/>
+<hr/>
+<br/>
+
+## Release beta-1.0
+
+Go to [Release Notes beta-1.0 Trello Card](https://trello.com/c/d40KSUlI) to checkout the first features.
