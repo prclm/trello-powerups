@@ -31,7 +31,6 @@ export default defineNuxtConfig({
   routeRules: {
     "/*": { cors: true },
   },
-  plugins: [{ src: "~/plugins/vercel.ts", mode: "client" }],
   devServer: {
     port: 5555,
   },
