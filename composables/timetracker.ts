@@ -71,7 +71,6 @@ export const useTimetracker = (
   const reloadTimerLists = async () => {
     const timerLists = await getTimerLists();
     timerListsRef.value = timerLists;
-    return timerLists;
   };
 
   const getTimerListsRef = () => {
@@ -468,6 +467,7 @@ export const useTimetracker = (
     getTimerLists,
     addTimerList,
     addTimer,
+    setTimer,
     startTimer,
     deleteTimer: deleteTimerConfirm,
     stopCurrentUserTimer,
