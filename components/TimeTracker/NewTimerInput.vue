@@ -3,6 +3,7 @@
     <form @submit="submitForm">
       <input v-model="inputModel" :placeholder="inputPlaceholder" required />
       <PButton
+        type="submit"
         :icon-before="iconPlay"
         :disabled="!inputModel.length"
         hide-title
