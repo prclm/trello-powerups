@@ -1,12 +1,13 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <button
-    :disabled="disabled"
-    :data-hide-title="hideTitle"
-    :data-round="round"
-    :data-pill="pill"
-    :data-icon-before="!!iconBefore"
-    :data-icon-after="!!iconAfter"
+    :type="type"
+    :disabled="disabled || undefined"
+    :data-hide-title="hideTitle || undefined"
+    :data-round="round || undefined"
+    :data-pill="pill || undefined"
+    :data-icon-before="!!iconBefore || undefined"
+    :data-icon-after="!!iconAfter || undefined"
   >
     <span class="icon-before">
       <slot name="icon-before">
@@ -24,24 +25,53 @@
   </button>
 </template>
 <script lang="ts">
+import { PropType } from "#imports";
 import { Icon, IconData } from "~~/composables/icons";
 </script>
 
 <script lang="ts" setup>
-defineProps<{
-  iconBefore?: IconData;
-  iconAfter?: IconData;
-  disabled?: boolean;
-  hideTitle?: boolean;
-  round?: boolean;
-  pill?: boolean;
-}>();
+defineProps({
+  type: {
+    type: String as PropType<"button" | "submit" | "reset">,
+    default: "button",
+  },
+  iconBefore: {
+    type: Object as PropType<IconData>,
+    default: undefined,
+  },
+  iconAfter: {
+    type: Object as PropType<IconData>,
+    default: undefined,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  hideTitle: {
+    type: Boolean,
+    default: false,
+  },
+  round: {
+    type: Boolean,
+    default: false,
+  },
+  pill: {
+    type: Boolean,
+    default: false,
+  },
+});
 </script>
 
 <style lang="scss" scoped>
 button {
   display: inline-flex;
   align-items: center;
+
+  margin: 1px; // space for outline styles on focus
+  &:focus-visible {
+    outline: 1px dotted #000;
+    outline: 5px auto -webkit-focus-ring-color;
+  }
 
   .icon-before,
   .icon-after {
