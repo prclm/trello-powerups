@@ -33,7 +33,7 @@ export const useTimetracker = (
   const { getContext, set, get, getAll, remove, localizeKey, localizeKeys, t } =
     trelloInstance;
 
-  /** returns current TimeStamp in miliseconds */
+  /** returns current timestamp in miliseconds */
   const now = () => new Date().getTime();
 
   /** generate an id based on userid and current timestamp or given value */
@@ -41,6 +41,18 @@ export const useTimetracker = (
     // the memberId tells who created the id
     const { member } = getContext();
     return [overwrite || now(), member].join("-");
+  };
+
+  const newTimestampId = (timestamp: ReturnType<typeof now>) => {
+    return newId(timestamp);
+  };
+
+  const getMemberFromId = (id: string) => {
+    return id.split("-").at(-1);
+  };
+
+  const getStartTimeFromId = (id: string) => {
+    return parseInt(id.split("-").at(0) as string);
   };
 
   /**
@@ -65,7 +77,8 @@ export const useTimetracker = (
       (data[TIMER_LIST_SCOPE] &&
         data[TIMER_LIST_SCOPE][TIMER_LIST_VISIBILITY]) ||
       [];
-    return Object.values(lists) as TimeTracker.TimerList[];
+    const timerLists = Object.values(lists) as TimeTracker.TimerList[];
+    return timerLists.map((timerList) => uncompressTimerList(timerList));
   };
 
   const reloadTimerLists = async () => {
@@ -83,8 +96,10 @@ export const useTimetracker = (
    *
    * - addTimerList()
    * - setTimerList()
-   *
    * - getTimerList()
+   * - compressTimerList()
+   * - uncompressTimerList()
+   *
    * - deleteTimerList() (ToDo?)
    */
 
@@ -111,7 +126,7 @@ export const useTimetracker = (
       scope,
       TIMER_LIST_VISIBILITY,
       `${TIMER_LIST_KEY_PREFIX}${timerList.id}`,
-      timerList
+      compressTimerList(timerList)
     );
     reloadTimerLists();
   };
@@ -126,11 +141,57 @@ export const useTimetracker = (
         throw new Error("Can not get timerList, scope is not defined.");
       scope = card;
     }
-    return (await get(
+    const timerList = (await get(
       scope,
       TIMER_LIST_VISIBILITY,
       `${TIMER_LIST_KEY_PREFIX}${id}`
     )) as TimeTracker.TimerList | undefined;
+
+    return timerList && uncompressTimerList(timerList);
+  };
+
+  const compressTimerList = (timerList: TimeTracker.TimerList) => {
+    const timers = timerList.timers.map((timer) => {
+      const tracks = timer.tracks.map(
+        (track: TimeTracker.TimeTrackCompressed) => {
+          delete track.startTime;
+          delete track.memberId;
+          return {
+            ...track,
+          };
+        }
+      );
+      return {
+        ...timer,
+        tracks,
+      };
+    });
+    return {
+      ...timerList,
+      timers,
+    };
+  };
+
+  const uncompressTimerList = (timerList: TimeTracker.TimerList) => {
+    const timers = timerList.timers.map((timer) => {
+      const tracks = timer.tracks.map((track) => {
+        const startTime = getStartTimeFromId(track.id);
+        const memberId = getMemberFromId(track.id);
+        return {
+          ...track,
+          startTime,
+          memberId,
+        };
+      });
+      return {
+        ...timer,
+        tracks,
+      };
+    });
+    return {
+      ...timerList,
+      timers,
+    };
   };
 
   /**
@@ -145,8 +206,8 @@ export const useTimetracker = (
 
   const addTimer = async (timerListId: string, title: string) => {
     const createTime = now();
-    const timerId = newId(createTime);
-    const trackId = newId(createTime);
+    const timerId = newTimestampId(createTime);
+    const trackId = newTimestampId(createTime);
     const newTimer = {
       id: timerId,
       title,
@@ -186,7 +247,7 @@ export const useTimetracker = (
 
     const createTime = now();
     const newTrack = {
-      id: newId(createTime),
+      id: newTimestampId(createTime),
       startTime: createTime,
       endTimePlaceholder: "hold memory for endTime", // this string is static by typescript type
     } as TimeTracker.TimeTrack;
