@@ -66,6 +66,7 @@ const unsavedTitle = window.localStorage.getItem(draftStorageName);
 const editableTitle = ref(
   unsavedTitle === null ? props.timer.title : unsavedTitle
 );
+const submitted = ref(false);
 
 const formRef = ref<HTMLFormElement | null>(null);
 
@@ -99,9 +100,13 @@ const handleSubmit = () => {
     title: removeLineBreaks(editableTitle.value),
   });
   emit("update:is-edit-mode", false);
+  submitted.value = true;
 };
 
 const handleFocusOut = (focusevent: FocusEvent) => {
+  // skip if the form is submitted
+  if (submitted.value) return;
+
   // if the focus is lost (outside this window or iframe), handle unsaved changes
   if (focusevent.relatedTarget === null) {
     handleUnsaved();
