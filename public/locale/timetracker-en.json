@@ -4,8 +4,15 @@
 
   "Start recording": "Start recording",
   "Stop recording": "Stop recording",
-  "Delete timer": "Delete timer",
 
+  "You have unsaved edits on this field.": "You have unsaved edits on this field.",
+  "View edits": "View edits",
+  "Discard": "Discard",
+
+  "save": "save",
+  "cancel": "cancel",
+
+  "Delete timer": "Delete timer",
   "Please confirm that you want to delete this recording.": "Please confirm that you want to delete this recording.",
   "Of course, delete!": "Of course, delete!",
   "Oh no, don't!": "Oh no, don't!",

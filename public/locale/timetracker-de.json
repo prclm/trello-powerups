@@ -5,6 +5,13 @@
   "Start recording": "Aufzeichnung starten",
   "Stop recording": "Aufzeichnung stoppen",
 
+  "You have unsaved edits on this field.": "In diesem Feld gibt es nicht gespeicherte Änderungen.",
+  "View edits": "Änderungen anzeigen",
+  "Discard": "Verwerfen",
+
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+
   "Delete timer": "Timer löschen",
   "Please confirm that you want to delete this recording.": "Bitte bestätigen Sie, dass Sie diese Aufnahme löschen möchten.",
   "Of course, delete!": "Natürlich, löschen!",

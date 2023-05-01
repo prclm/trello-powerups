@@ -2,12 +2,17 @@ export namespace TimeTracker {
   type Timestamp = number; // Datetime in miliseconds
   type Time = number; // miliseconds
 
-  interface TimeTrack {
+  interface TimeTrackCompressed {
     id: string;
-    startTime: Timestamp;
+    memberId?: Trello.Member["id"];
+    startTime?: Timestamp;
     endTime?: Timestamp;
     endTimePlaceholder?: "hold memory for endTime";
     note?: string;
+  }
+  interface TimeTrack extends TimeTrackCompressed {
+    memberId: Trello.Member["id"];
+    startTime: Timestamp;
   }
 
   interface Timer {

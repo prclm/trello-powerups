@@ -5,6 +5,7 @@ import iconPlay from "@iconify-icons/tabler/player-play-filled";
 import iconRecord from "@iconify-icons/tabler/player-record-filled";
 import iconStop from "@iconify-icons/tabler/player-stop-filled";
 import iconDelete from "@iconify-icons/tabler/trash";
+import iconCancel from "@iconify-icons/tabler/x";
 import { svgData, svgImage, svgStyle } from "~~/utils/svg";
 export { Icon } from "@iconify/vue";
 export type { IconifyIcon as IconData } from "@iconify/types";
@@ -17,6 +18,7 @@ export {
   iconTimerPlay,
   iconTimerRecord,
   iconDelete,
+  iconCancel,
 };
 
 export const cssFx = {
